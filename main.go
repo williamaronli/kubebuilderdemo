@@ -27,6 +27,8 @@ import (
 
 	batchv1 "tutorial.kubebuilder.io/project/api/v1"
 	"tutorial.kubebuilder.io/project/controllers"
+
+	batchv1 "example/api/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -48,6 +50,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(batchv1.AddToScheme(scheme))
+	_ = batchv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -64,7 +67,7 @@ func main() {
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. "+
-				"Enabling this will ensure there is only one active controller manager.")
+			"Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
@@ -108,6 +111,10 @@ func main() {
 			setupLog.Error(err, "unable to create webhook", "webhook", "Captain")
 			os.Exit(1)
 		}
+	}
+	if err = (&batchv1.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
+		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 
