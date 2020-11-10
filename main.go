@@ -29,6 +29,7 @@ import (
 	"tutorial.kubebuilder.io/project/controllers"
 
 	batchv1 "example/api/v1"
+	"example/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -114,6 +115,14 @@ func main() {
 	}
 	if err = (&batchv1.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
+		os.Exit(1)
+	}
+	if err = (&controllers.WorkloadGroupReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("WorkloadGroup"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "WorkloadGroup")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
